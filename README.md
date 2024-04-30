@@ -32,12 +32,18 @@ source_tokenizer = Tokenizer.from_file("path/to/source_tokenizer_config.json")
 target_tokenizer = Tokenizer.from_file("path/to/target_tokenizer_config.json")
 model = load_model("path/to/saved_model")
 
-# Preprocess input data
-input_data = preprocess_data(input_text, source_tokenizer)
+# Prompt the user to input text
+input_text = input("Enter the Malayalam text to transliterate: ")
 
-# Transliterate using the model
-output_data = model.transliterate(input_data)
+# Preprocess the input text
+input_sequence = source_tokenizer.texts_to_sequences([input_text])
+input_sequence_padded = pad_sequences(input_sequence, maxlen=max_seq_length, padding='post')
 
-# Display results
-print("Input:", input_text)
-print("Output:", output_data)
+# Generate predictions
+predicted_sequence = model.predict(input_sequence_padded)
+
+# Decode the predicted sequence
+predicted_text = "".join(target_tokenizer.index_word[i] for i in np.argmax(predicted_sequence, axis=-1)[0] if i != 0)
+
+print("Input Text:", input_text)
+print("Predicted Transliteration:", predicted_text)
